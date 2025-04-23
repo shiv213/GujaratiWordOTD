@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gujarati Word of the Day</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gujarati Word of the Day</h1>
+            <p class="date" id="current-date"></p>
+        </header>
+        
+        <main>
+            <div class="word-card">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading today's word...</p>
+                </div>
+                
+                <div class="word-content" id="word-content" style="display: none;">
+                    <div class="word-header">
+                        <h2 id="word"></h2>
+                        <div class="pronunciation-container">
+                            <div class="pronunciation">
+                                <p id="ipa"></p>
+                            </div>
+                            <button id="listen-btn" title="Listen to pronunciation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="definitions" id="definitions">
+                        <!-- Definitions will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="error" id="error" style="display: none;">
+                    <p>Sorry, we couldn't load today's word. Please try again later.</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Learn a new Gujarati word every day!</p>
+            <button id="share-btn">Share This Word</button>
+            <p class="footnote">Powered by <a href="https://gujarati.shivvtrivedi.com/" target="_blank">GujaratiAPI</a> made with love by <a href="http://shivvtrivedi.com/" target="_blank">Shiv Trivedi</a></p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
