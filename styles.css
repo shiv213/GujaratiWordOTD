@@ -236,8 +236,15 @@ footer p {
     transition: background-color 0.3s, transform 0.2s;
 }
 
+/* Explicitly set the background color for the new word button */
 #new-word-btn {
-    background-color: var(--accent-color);
+    background-color: #ffbe0b !important; /* Using !important to override any potential conflicts */
+    color: #2d334a !important; /* Darker text for better contrast on yellow */
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 500 !important;
 }
 
 #share-btn:hover, #new-word-btn:hover {
@@ -245,7 +252,7 @@ footer p {
 }
 
 #new-word-btn:hover {
-    background-color: #e9ad00;
+    background-color: #e9ad00 !important;
 }
 
 #share-btn:hover {
