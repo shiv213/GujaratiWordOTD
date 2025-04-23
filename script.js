@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up buttons
     shareButton.addEventListener('click', shareWord);
     listenButton.addEventListener('click', speakWord);
+    const newWordButton = document.getElementById('new-word-btn');
+    newWordButton.addEventListener('click', getRandomWord);
     
     /**
      * Fetches the word of the day based on the current date
@@ -189,6 +191,38 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Speech synthesis not supported
             alert('Sorry, your browser does not support text-to-speech functionality.');
+        }
+    }
+    
+    /**
+     * Fetches a random word from the API
+     */
+    async function getRandomWord() {
+        try {
+            // Show loading state
+            wordContentElement.style.display = 'none';
+            errorElement.style.display = 'none';
+            loadingElement.style.display = 'flex';
+            loadingElement.querySelector('p').textContent = 'Loading new word...';
+            
+            // Get a list of words from the API
+            const response = await fetch(`${API_BASE_URL}/api/v1/words?limit=100`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch words');
+            }
+            
+            const words = await response.json();
+            
+            // Select a random word from the list
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const randomWord = words[randomIndex];
+            
+            // Display the random word
+            displayWord(randomWord);
+        } catch (error) {
+            console.error('Error fetching random word:', error);
+            handleError(error);
         }
     }
     

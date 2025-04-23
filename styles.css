@@ -217,7 +217,14 @@ footer p {
     text-decoration: underline;
 }
 
-#share-btn {
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#share-btn, #new-word-btn {
     background-color: var(--secondary-color);
     color: white;
     border: none;
@@ -229,12 +236,23 @@ footer p {
     transition: background-color 0.3s, transform 0.2s;
 }
 
-#share-btn:hover {
-    background-color: #3db8b0;
+#new-word-btn {
+    background-color: var(--accent-color);
+}
+
+#share-btn:hover, #new-word-btn:hover {
     transform: translateY(-2px);
 }
 
-#share-btn:active {
+#new-word-btn:hover {
+    background-color: #e9ad00;
+}
+
+#share-btn:hover {
+    background-color: #3db8b0;
+}
+
+#share-btn:active, #new-word-btn:active {
     transform: translateY(0);
 }
 
