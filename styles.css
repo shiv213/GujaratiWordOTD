@@ -158,6 +158,26 @@ header h1 {
     color: var(--text-color);
 }
 
+/* Example Sentence Styles */
+.example-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-left: 4px solid var(--accent-color);
+    background-color: rgba(255, 190, 11, 0.1);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.example-label {
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.example-text {
+    color: var(--text-color);
+    font-style: italic;
+}
+
 /* Loading Styles */
 .loading {
     display: flex;
@@ -217,6 +237,12 @@ footer p {
     text-decoration: underline;
 }
 
+.support-button {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
 .button-group {
     display: flex;
     justify-content: center;
@@ -236,15 +262,9 @@ footer p {
     transition: background-color 0.3s, transform 0.2s;
 }
 
-/* Explicitly set the background color for the new word button */
 #new-word-btn {
     background-color: #ffbe0b !important; /* Using !important to override any potential conflicts */
     color: #2d334a !important; /* Darker text for better contrast on yellow */
-    border: none !important;
-    border-radius: 50px !important;
-    padding: 0.75rem 1.5rem !important;
-    font-family: 'Poppins', sans-serif !important;
-    font-weight: 500 !important;
 }
 
 #share-btn:hover, #new-word-btn:hover {

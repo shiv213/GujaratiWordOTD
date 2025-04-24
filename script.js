@@ -95,6 +95,24 @@ document.addEventListener('DOMContentLoaded', () => {
             definitionItem.appendChild(definition);
             definitionsElement.appendChild(definitionItem);
         });
+        
+        // Display example sentence if available
+        if (word.example) {
+            const exampleContainer = document.createElement('div');
+            exampleContainer.className = 'example-container';
+            
+            const exampleLabel = document.createElement('p');
+            exampleLabel.className = 'example-label';
+            exampleLabel.textContent = 'Example:';
+            
+            const exampleText = document.createElement('p');
+            exampleText.className = 'example-text';
+            exampleText.textContent = word.example;
+            
+            exampleContainer.appendChild(exampleLabel);
+            exampleContainer.appendChild(exampleText);
+            definitionsElement.appendChild(exampleContainer);
+        }
     }
     
     /**
@@ -144,7 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function shareWord() {
         const wordText = wordElement.textContent;
-        const shareText = `Today's Gujarati Word of the Day: ${wordText}`;
+        let shareText = `Today's Gujarati Word of the Day: ${wordText}`;
+        
+        // Check if there's an example sentence to include
+        const exampleElement = document.querySelector('.example-text');
+        if (exampleElement) {
+            shareText += `\nExample: ${exampleElement.textContent}`;
+        }
+        
         const shareUrl = window.location.href;
         
         if (navigator.share) {
@@ -161,22 +186,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
-     * Speaks the current word using the Web Speech API
+     * Speaks the IPA pronunciation using the Web Speech API
      */
     function speakWord() {
-        // Get the current word
-        const wordText = wordElement.textContent;
+        // Get the IPA pronunciation
+        // const text = ipaElement.textContent.slice(1, -1); // Remove slashes from IPA text
+        const text = wordElement.textContent;
         
-        // Check if speech synthesis is supported
-        if ('speechSynthesis' in window) {
+        // Check if there's an IPA pronunciation and if speech synthesis is supported
+        if (text && 'speechSynthesis' in window) {
             // Create a new speech synthesis utterance
-            const utterance = new SpeechSynthesisUtterance(wordText);
+            const utterance = new SpeechSynthesisUtterance(text);
             
-            // Set the language to Gujarati
+            // Set the language to English for better IPA pronunciation
             utterance.lang = 'gu-IN';
             
             // Set a slower rate for better pronunciation
-            utterance.rate = 0.8;
+            utterance.rate = 0.7;
             
             // Add visual feedback when speaking
             listenButton.classList.add('speaking');
@@ -186,8 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 listenButton.classList.remove('speaking');
             };
             
-            // Speak the word
+            // Speak the IPA pronunciation
             window.speechSynthesis.speak(utterance);
+        } else if (!text) {
+            // No IPA pronunciation available
+            alert('Sorry, no pronunciation is available for this word.');
         } else {
             // Speech synthesis not supported
             alert('Sorry, your browser does not support text-to-speech functionality.');
@@ -238,21 +267,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 ipa: "/nəməste/",
                 definitions: [
                     { pos: "interjection", definition: "Hello; Greetings (a common greeting)" }
-                ]
+                ],
+                example: "તમને મળીને આનંદ થયો, નમસ્તે!"
             },
             {
                 word: "આભાર",
                 ipa: "/ābhār/",
                 definitions: [
                     { pos: "noun", definition: "Thanks; Gratitude" }
-                ]
+                ],
+                example: "તમારી મદદ બદલ આભાર."
             },
             {
                 word: "પ્રેમ",
                 ipa: "/prem/",
                 definitions: [
                     { pos: "noun", definition: "Love; Affection" }
-                ]
+                ],
+                example: "માતાનો પ્રેમ સૌથી મહાન છે."
             }
         ];
         
