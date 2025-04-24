@@ -36,9 +36,9 @@ No special prerequisites are needed. The application runs in any modern web brow
 ## 🔧 How It Works
 
 1. The application uses the current date as a seed to consistently select the same word each day
-2. Words are fetched from the [GujaratiAPI](https://github.com/shiv213/GujaratiAPI)
+2. Words are fetched directly by ID from the [GujaratiAPI](https://github.com/shiv213/GujaratiAPI)
 3. The word, its IPA pronunciation, definitions, and example sentences are displayed
-4. Users can listen to the pronunciation by clicking the sound icon
+4. Users can listen to the IPA pronunciation by clicking the sound icon
 5. Users can get a new random word by clicking the "Get New Word" button
 6. Users can share words using the "Share This Word" button
 
@@ -76,4 +76,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 If you find this project helpful or educational, consider supporting the developer:
 
 <a href="https://www.buymeacoffee.com/shivvtrivedi" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-

@@ -37,19 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateString = formatDateForSeed(today);
             const seed = hashCode(dateString);
             
-            // Get a list of words from the API
-            const response = await fetch(`${API_BASE_URL}/api/v1/words?limit=100`);
+            // Total number of words in the API
+            const TOTAL_WORDS = 6776;
+            
+            // Use the seed to select a word ID between 1 and TOTAL_WORDS
+            // This ensures the same word is shown all day, but changes each day
+            const wordId = Math.abs(seed % TOTAL_WORDS) + 1;
+            
+            // Fetch the specific word by its ID
+            const response = await fetch(`${API_BASE_URL}/api/v1/words/${wordId}`);
             
             if (!response.ok) {
-                throw new Error('Failed to fetch words');
+                throw new Error('Failed to fetch word of the day');
             }
             
-            const words = await response.json();
-            
-            // Use the seed to select a word from the list
-            // This ensures the same word is shown all day, but changes each day
-            const index = Math.abs(seed % words.length);
-            return words[index];
+            return await response.json();
         } catch (error) {
             console.error('Error fetching word of the day:', error);
             console.log('Using fallback word...');
@@ -190,16 +192,15 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function speakWord() {
         // Get the IPA pronunciation
-        // const text = ipaElement.textContent.slice(1, -1); // Remove slashes from IPA text
-        const text = wordElement.textContent;
+        const ipaText = ipaElement.textContent.slice(1, -1); // Remove slashes
         
         // Check if there's an IPA pronunciation and if speech synthesis is supported
-        if (text && 'speechSynthesis' in window) {
+        if (ipaText && 'speechSynthesis' in window) {
             // Create a new speech synthesis utterance
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new SpeechSynthesisUtterance(ipaText);
             
             // Set the language to English for better IPA pronunciation
-            utterance.lang = 'gu-IN';
+            utterance.lang = 'en-US';
             
             // Set a slower rate for better pronunciation
             utterance.rate = 0.7;
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Speak the IPA pronunciation
             window.speechSynthesis.speak(utterance);
-        } else if (!text) {
+        } else if (!ipaText) {
             // No IPA pronunciation available
             alert('Sorry, no pronunciation is available for this word.');
         } else {
@@ -234,18 +235,20 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingElement.style.display = 'flex';
             loadingElement.querySelector('p').textContent = 'Loading new word...';
             
-            // Get a list of words from the API
-            const response = await fetch(`${API_BASE_URL}/api/v1/words?limit=100`);
+            // Total number of words in the API
+            const TOTAL_WORDS = 6776;
+            
+            // Generate a random word ID between 1 and TOTAL_WORDS
+            const randomWordId = Math.floor(Math.random() * TOTAL_WORDS) + 1;
+            
+            // Fetch the specific word by its ID
+            const response = await fetch(`${API_BASE_URL}/api/v1/words/${randomWordId}`);
             
             if (!response.ok) {
-                throw new Error('Failed to fetch words');
+                throw new Error('Failed to fetch random word');
             }
             
-            const words = await response.json();
-            
-            // Select a random word from the list
-            const randomIndex = Math.floor(Math.random() * words.length);
-            const randomWord = words[randomIndex];
+            const randomWord = await response.json();
             
             // Display the random word
             displayWord(randomWord);
