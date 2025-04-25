@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM elements
     const currentDateElement = document.getElementById('current-date');
     const wordElement = document.getElementById('word');
-    const ipaElement = document.getElementById('ipa');
+    const romanizationElement = document.getElementById('romanization');
     const definitionsElement = document.getElementById('definitions');
     const loadingElement = document.getElementById('loading');
     const wordContentElement = document.getElementById('word-content');
     const errorElement = document.getElementById('error');
     const shareButton = document.getElementById('share-btn');
-    const listenButton = document.getElementById('listen-btn');
+    const listenWordButton = document.getElementById('listen-word-btn');
     
     // API endpoint
     const API_BASE_URL = 'https://gujarati.shivvtrivedi.com';
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set up buttons
     shareButton.addEventListener('click', shareWord);
-    listenButton.addEventListener('click', speakWord);
+    listenWordButton.addEventListener('click', playWordAudio);
     const newWordButton = document.getElementById('new-word-btn');
     newWordButton.addEventListener('click', getRandomWord);
     
@@ -38,45 +38,85 @@ document.addEventListener('DOMContentLoaded', () => {
             const seed = hashCode(dateString);
             
             // Total number of words in the API
-            const TOTAL_WORDS = 6776;
-            
+            // const TOTAL_WORDS = 6776;
+            const TOTAL_WORDS = 1000;
+
             // Use the seed to select a word ID between 1 and TOTAL_WORDS
             // This ensures the same word is shown all day, but changes each day
             const wordId = Math.abs(seed % TOTAL_WORDS) + 1;
+            // console.log('Fetching word with ID:', wordId);
             
             // Fetch the specific word by its ID
-            const response = await fetch(`${API_BASE_URL}/api/v1/words/${wordId}`);
+            const apiUrl = `${API_BASE_URL}/api/v1/words/${wordId}`;
+            // console.log('API URL:', apiUrl);
+            const response = await fetch(apiUrl);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch word of the day');
             }
             
-            return await response.json();
+            const wordData = await response.json();
+            
+            // Store the numeric ID in the response for audio playback
+            wordData.numeric_id = wordId;
+            
+            return wordData;
         } catch (error) {
             console.error('Error fetching word of the day:', error);
-            console.log('Using fallback word...');
+            // console.log('Using fallback word...');
             return getFallbackWord();
         }
     }
     
     /**
-     * Displays the word, pronunciation, and definitions on the page
+     * Displays the word, romanization, and definitions on the page
      */
     function displayWord(word) {
         // Hide loading and show content
         loadingElement.style.display = 'none';
         wordContentElement.style.display = 'block';
         
+        // Log the word data for debugging
+        // console.log('Word data:', word);
+        
         // Display the word
         wordElement.textContent = word.word;
         
-        // Display pronunciation if available
-        if (word.ipa) {
-            ipaElement.textContent = word.ipa;
-        } else if (word.ipa_alt) {
-            ipaElement.textContent = word.ipa_alt;
+        // Store the current word ID for audio playback
+        // Use the numeric_id we added, or try to extract it from other properties
+        let wordId = '';
+        
+        // First priority: use the numeric_id we added when fetching the word
+        if (word.numeric_id) {
+            wordId = word.numeric_id;
+        } 
+        // Second priority: use id or _id if available
+        else if (word.id) {
+            wordId = word.id;
+        } else if (word._id) {
+            wordId = word._id;
+        } 
+        // Third priority: try to extract the ID from the URL if available
+        else {
+            const wordUrl = word.url || '';
+            const urlMatch = wordUrl.match(/\/words\/(\d+)/);
+            if (urlMatch && urlMatch[1]) {
+                wordId = urlMatch[1];
+            } 
+            // Last resort: use the word itself
+            else {
+                wordId = word.word || '';
+            }
+        }
+        
+        wordElement.dataset.wordId = wordId;
+        // console.log('Setting word ID for audio:', wordId);
+        
+        // Display romanization if available
+        if (word.romanization) {
+            romanizationElement.textContent = word.romanization;
         } else {
-            ipaElement.textContent = '';
+            romanizationElement.textContent = '';
         }
         
         // Display definitions
@@ -103,16 +143,50 @@ document.addEventListener('DOMContentLoaded', () => {
             const exampleContainer = document.createElement('div');
             exampleContainer.className = 'example-container';
             
+            const exampleHeader = document.createElement('div');
+            exampleHeader.className = 'example-header';
+            
             const exampleLabel = document.createElement('p');
             exampleLabel.className = 'example-label';
             exampleLabel.textContent = 'Example:';
+            
+            // Create listen button for example
+            const listenExampleBtn = document.createElement('button');
+            listenExampleBtn.id = 'listen-example-btn';
+            listenExampleBtn.className = 'listen-btn';
+            listenExampleBtn.title = 'Listen to example';
+            listenExampleBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+            `;
+            
+            // Add event listener to play example audio
+            listenExampleBtn.addEventListener('click', playExampleAudio);
+            
+            exampleHeader.appendChild(exampleLabel);
+            exampleHeader.appendChild(listenExampleBtn);
             
             const exampleText = document.createElement('p');
             exampleText.className = 'example-text';
             exampleText.textContent = word.example;
             
-            exampleContainer.appendChild(exampleLabel);
-            exampleContainer.appendChild(exampleText);
+            // Add example romanization if available
+            if (word.example_romanization) {
+                const exampleRomanization = document.createElement('p');
+                exampleRomanization.className = 'example-romanization';
+                exampleRomanization.textContent = word.example_romanization;
+                
+                exampleContainer.appendChild(exampleHeader);
+                exampleContainer.appendChild(exampleText);
+                exampleContainer.appendChild(exampleRomanization);
+            } else {
+                exampleContainer.appendChild(exampleHeader);
+                exampleContainer.appendChild(exampleText);
+            }
+            
             definitionsElement.appendChild(exampleContainer);
         }
     }
@@ -188,39 +262,96 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
-     * Speaks the IPA pronunciation using the Web Speech API
+     * Plays the audio for the current word
      */
-    function speakWord() {
-        // Get the IPA pronunciation
-        const ipaText = ipaElement.textContent.slice(1, -1); // Remove slashes
-        
-        // Check if there's an IPA pronunciation and if speech synthesis is supported
-        if (ipaText && 'speechSynthesis' in window) {
-            // Create a new speech synthesis utterance
-            const utterance = new SpeechSynthesisUtterance(ipaText);
+    async function playWordAudio() {
+        try {
+            const wordId = wordElement.dataset.wordId;
+            // console.log('Word ID for audio:', wordId);
             
-            // Set the language to English for better IPA pronunciation
-            utterance.lang = 'en-US';
+            if (!wordId) {
+                alert('Sorry, audio is not available for this word.');
+                return;
+            }
             
-            // Set a slower rate for better pronunciation
-            utterance.rate = 0.7;
+            // Add visual feedback when playing
+            listenWordButton.classList.add('speaking');
             
-            // Add visual feedback when speaking
-            listenButton.classList.add('speaking');
+            // Create the audio URL
+            const audioUrl = `${API_BASE_URL}/api/v1/audio/word/${wordId}`;
+            // console.log('Audio URL:', audioUrl);
             
-            // Add an event listener for when speech has finished
-            utterance.onend = () => {
-                listenButton.classList.remove('speaking');
+            // Create and play audio
+            const audio = new Audio(audioUrl);
+            
+            // Add event listener for when audio has finished
+            audio.onended = () => {
+                listenWordButton.classList.remove('speaking');
             };
             
-            // Speak the IPA pronunciation
-            window.speechSynthesis.speak(utterance);
-        } else if (!ipaText) {
-            // No IPA pronunciation available
-            alert('Sorry, no pronunciation is available for this word.');
-        } else {
-            // Speech synthesis not supported
-            alert('Sorry, your browser does not support text-to-speech functionality.');
+            // Handle errors
+            audio.onerror = (e) => {
+                console.error('Audio error:', e);
+                listenWordButton.classList.remove('speaking');
+                alert('Sorry, there was an error playing the audio.');
+            };
+            
+            // Play the audio
+            await audio.play();
+            
+        } catch (error) {
+            console.error('Error playing word audio:', error);
+            listenWordButton.classList.remove('speaking');
+            alert('Sorry, there was an error playing the audio.');
+        }
+    }
+    
+    /**
+     * Plays the audio for the example sentence
+     */
+    async function playExampleAudio() {
+        try {
+            const wordId = wordElement.dataset.wordId;
+            const listenExampleButton = document.getElementById('listen-example-btn');
+            // console.log('Word ID for example audio:', wordId);
+            
+            if (!wordId || !listenExampleButton) {
+                alert('Sorry, audio is not available for this example.');
+                return;
+            }
+            
+            // Add visual feedback when playing
+            listenExampleButton.classList.add('speaking');
+            
+            // Create the audio URL
+            const audioUrl = `${API_BASE_URL}/api/v1/audio/example/${wordId}`;
+            // console.log('Example Audio URL:', audioUrl);
+            
+            // Create and play audio
+            const audio = new Audio(audioUrl);
+            
+            // Add event listener for when audio has finished
+            audio.onended = () => {
+                listenExampleButton.classList.remove('speaking');
+            };
+            
+            // Handle errors
+            audio.onerror = (e) => {
+                console.error('Example audio error:', e);
+                listenExampleButton.classList.remove('speaking');
+                alert('Sorry, there was an error playing the audio.');
+            };
+            
+            // Play the audio
+            await audio.play();
+            
+        } catch (error) {
+            console.error('Error playing example audio:', error);
+            const listenExampleButton = document.getElementById('listen-example-btn');
+            if (listenExampleButton) {
+                listenExampleButton.classList.remove('speaking');
+            }
+            alert('Sorry, there was an error playing the audio.');
         }
     }
     
@@ -236,19 +367,26 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingElement.querySelector('p').textContent = 'Loading new word...';
             
             // Total number of words in the API
-            const TOTAL_WORDS = 6776;
+            // const TOTAL_WORDS = 6776;
+            const TOTAL_WORDS = 1000;
             
             // Generate a random word ID between 1 and TOTAL_WORDS
             const randomWordId = Math.floor(Math.random() * TOTAL_WORDS) + 1;
+            // console.log('Fetching random word with ID:', randomWordId);
             
             // Fetch the specific word by its ID
-            const response = await fetch(`${API_BASE_URL}/api/v1/words/${randomWordId}`);
+            const apiUrl = `${API_BASE_URL}/api/v1/words/${randomWordId}`;
+            // console.log('Random word API URL:', apiUrl);
+            const response = await fetch(apiUrl);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch random word');
             }
             
             const randomWord = await response.json();
+            
+            // Store the numeric ID in the response for audio playback
+            randomWord.numeric_id = randomWordId;
             
             // Display the random word
             displayWord(randomWord);
@@ -266,28 +404,37 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sample fallback words
         const fallbackWords = [
             {
+                id: "fallback1",
+                numeric_id: 1,
                 word: "નમસ્તે",
-                ipa: "/nəməste/",
+                romanization: "namaste",
                 definitions: [
                     { pos: "interjection", definition: "Hello; Greetings (a common greeting)" }
                 ],
-                example: "તમને મળીને આનંદ થયો, નમસ્તે!"
+                example: "તમને મળીને આનંદ થયો, નમસ્તે!",
+                example_romanization: "tamane maḷīne ānanda thayo, namaste!"
             },
             {
+                id: "fallback2",
+                numeric_id: 2,
                 word: "આભાર",
-                ipa: "/ābhār/",
+                romanization: "ābhār",
                 definitions: [
                     { pos: "noun", definition: "Thanks; Gratitude" }
                 ],
-                example: "તમારી મદદ બદલ આભાર."
+                example: "તમારી મદદ બદલ આભાર.",
+                example_romanization: "tamārī madada badala ābhāra."
             },
             {
+                id: "fallback3",
+                numeric_id: 3,
                 word: "પ્રેમ",
-                ipa: "/prem/",
+                romanization: "prem",
                 definitions: [
                     { pos: "noun", definition: "Love; Affection" }
                 ],
-                example: "માતાનો પ્રેમ સૌથી મહાન છે."
+                example: "માતાનો પ્રેમ સૌથી મહાન છે.",
+                example_romanization: "mātāno prema sauthī mahāna che."
             }
         ];
         
