@@ -190,6 +190,13 @@ header h1 {
     color: var(--light-text);
     font-size: 0.9rem;
     font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.example-translation {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* Loading Styles */

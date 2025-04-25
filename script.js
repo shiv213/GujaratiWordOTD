@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const seed = hashCode(dateString);
             
             // Total number of words in the API
-            // const TOTAL_WORDS = 6776;
-            const TOTAL_WORDS = 1000;
+            const TOTAL_WORDS = 6776;
+            // const TOTAL_WORDS = 4000;
 
             // Use the seed to select a word ID between 1 and TOTAL_WORDS
             // This ensures the same word is shown all day, but changes each day
@@ -173,18 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
             exampleText.className = 'example-text';
             exampleText.textContent = word.example;
             
+            exampleContainer.appendChild(exampleHeader);
+            exampleContainer.appendChild(exampleText);
+            
             // Add example romanization if available
             if (word.example_romanization) {
                 const exampleRomanization = document.createElement('p');
                 exampleRomanization.className = 'example-romanization';
                 exampleRomanization.textContent = word.example_romanization;
-                
-                exampleContainer.appendChild(exampleHeader);
-                exampleContainer.appendChild(exampleText);
                 exampleContainer.appendChild(exampleRomanization);
-            } else {
-                exampleContainer.appendChild(exampleHeader);
-                exampleContainer.appendChild(exampleText);
+            }
+            
+            // Add example translation if available
+            if (word.example_translation) {
+                const exampleTranslation = document.createElement('p');
+                exampleTranslation.className = 'example-translation';
+                exampleTranslation.textContent = word.example_translation;
+                exampleContainer.appendChild(exampleTranslation);
             }
             
             definitionsElement.appendChild(exampleContainer);
@@ -367,8 +372,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingElement.querySelector('p').textContent = 'Loading new word...';
             
             // Total number of words in the API
-            // const TOTAL_WORDS = 6776;
-            const TOTAL_WORDS = 1000;
+            const TOTAL_WORDS = 6776;
+            // const TOTAL_WORDS = 4000;
             
             // Generate a random word ID between 1 and TOTAL_WORDS
             const randomWordId = Math.floor(Math.random() * TOTAL_WORDS) + 1;
@@ -412,7 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     { pos: "interjection", definition: "Hello; Greetings (a common greeting)" }
                 ],
                 example: "તમને મળીને આનંદ થયો, નમસ્તે!",
-                example_romanization: "tamane maḷīne ānanda thayo, namaste!"
+                example_romanization: "tamane maḷīne ānanda thayo, namaste!",
+                example_translation: "I am happy to meet you, hello!"
             },
             {
                 id: "fallback2",
@@ -423,7 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     { pos: "noun", definition: "Thanks; Gratitude" }
                 ],
                 example: "તમારી મદદ બદલ આભાર.",
-                example_romanization: "tamārī madada badala ābhāra."
+                example_romanization: "tamārī madada badala ābhāra.",
+                example_translation: "Thanks for your help."
             },
             {
                 id: "fallback3",
@@ -434,7 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     { pos: "noun", definition: "Love; Affection" }
                 ],
                 example: "માતાનો પ્રેમ સૌથી મહાન છે.",
-                example_romanization: "mātāno prema sauthī mahāna che."
+                example_romanization: "mātāno prema sauthī mahāna che.",
+                example_translation: "A mother's love is the greatest."
             }
         ];
         
