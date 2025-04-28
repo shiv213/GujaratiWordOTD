@@ -41,9 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const TOTAL_WORDS = 6776;
             // const TOTAL_WORDS = 4000;
 
-            // Use the seed to select a word ID between 1 and TOTAL_WORDS
-            // This ensures the same word is shown all day, but changes each day
-            const wordId = Math.abs(seed % TOTAL_WORDS) + 1;
+            // Create a more distributed selection algorithm
+            // This uses the golden ratio to create a well-distributed sequence
+            // The golden ratio helps ensure consecutive days have words far apart
+            const goldenRatioConjugate = 0.618033988749895;
+            
+            // Generate a normalized value between 0 and 1 using the seed
+            let normalizedValue = (Math.abs(seed) * goldenRatioConjugate) % 1;
+            
+            // Scale to get a word ID between 1 and TOTAL_WORDS
+            // This approach uses the golden ratio method (also known as Fibonacci hashing)
+            // which creates a sequence that spreads values evenly across the range
+            // Consecutive days will have words that are far apart in the index
+            const wordId = Math.floor(normalizedValue * TOTAL_WORDS) + 1;
             // console.log('Fetching word with ID:', wordId);
             
             // Fetch the specific word by its ID
