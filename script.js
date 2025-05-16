@@ -9,7 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorElement = document.getElementById('error');
     const shareButton = document.getElementById('share-btn');
     const listenWordButton = document.getElementById('listen-word-btn');
+    const newWordButton = document.getElementById('new-word-btn');
+    const toggleFlashcardModeButton = document.getElementById('toggle-flashcard-mode-btn');
+    const flashcardContentElement = document.getElementById('flashcard-content');
+    const flashcardElement = document.querySelector('.flashcard');
+    const flashcardWordElement = document.getElementById('flashcard-word');
+    const flashcardListenButton = document.getElementById('flashcard-listen-btn');
+    const flashcardRomanizationElement = document.getElementById('flashcard-romanization');
+    const flashcardDefinitionsElement = document.getElementById('flashcard-definitions');
+    const flipCardButton = document.getElementById('flip-card-btn');
     
+    let isFlashcardMode = false;
+    let currentWordData = null; // To store the current word data for flashcard mode
+
     // API endpoint
     const API_BASE_URL = 'https://gujarati.shivvtrivedi.com';
     
@@ -25,9 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up buttons
     shareButton.addEventListener('click', shareWord);
     listenWordButton.addEventListener('click', playWordAudio);
-    const newWordButton = document.getElementById('new-word-btn');
     newWordButton.addEventListener('click', getRandomWord);
-    
+    toggleFlashcardModeButton.addEventListener('click', toggleFlashcardMode);
+    flipCardButton.addEventListener('click', flipCard);
+    flashcardListenButton.addEventListener('click', playWordAudio); // Reuse existing function
+
     /**
      * Fetches the word of the day based on the current date
      */
@@ -69,10 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Store the numeric ID in the response for audio playback
             wordData.numeric_id = wordId;
-            
+            currentWordData = wordData; // Store for flashcard mode
             return wordData;
         } catch (error) {
             console.error('Error fetching word of the day:', error);
+            currentWordData = null; // Reset on error
             // console.log('Using fallback word...');
             return getFallbackWord();
         }
@@ -84,10 +99,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayWord(word) {
         // Hide loading and show content
         loadingElement.style.display = 'none';
-        wordContentElement.style.display = 'block';
+        
+        if (isFlashcardMode) {
+            wordContentElement.style.display = 'none';
+            flashcardContentElement.style.display = 'flex';
+            populateFlashcard(word);
+        } else {
+            flashcardContentElement.style.display = 'none';
+            wordContentElement.style.display = 'block';
+        }
         
         // Log the word data for debugging
         // console.log('Word data:', word);
+        currentWordData = word; // Update current word data
         
         // Display the word
         wordElement.textContent = word.word;
@@ -130,7 +154,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Display definitions
-        definitionsElement.innerHTML = '';
+        definitionsElement.innerHTML = ''; // Clear previous definitions
+        populateDefinitionsAndExample(word, definitionsElement); // Use helper for normal view
+    }
+
+    /**
+     * Populates definition and example content for a given word into a target element.
+     */
+    function populateDefinitionsAndExample(word, targetElement) {
+        targetElement.innerHTML = ''; // Clear previous content
+
         word.definitions.forEach(def => {
             const definitionItem = document.createElement('div');
             definitionItem.className = 'definition-item';
@@ -145,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             definitionItem.appendChild(pos);
             definitionItem.appendChild(definition);
-            definitionsElement.appendChild(definitionItem);
+            targetElement.appendChild(definitionItem);
         });
         
         // Display example sentence if available
@@ -162,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Create listen button for example
             const listenExampleBtn = document.createElement('button');
-            listenExampleBtn.id = 'listen-example-btn';
+            listenExampleBtn.id = `listen-example-btn-${targetElement.id}`; // Unique ID for example listen button
             listenExampleBtn.className = 'listen-btn';
             listenExampleBtn.title = 'Listen to example';
             listenExampleBtn.innerHTML = `
@@ -202,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 exampleContainer.appendChild(exampleTranslation);
             }
             
-            definitionsElement.appendChild(exampleContainer);
+            targetElement.appendChild(exampleContainer);
         }
     }
     
@@ -279,18 +312,25 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Plays the audio for the current word
      */
-    async function playWordAudio() {
+    async function playWordAudio(event) {
         try {
-            const wordId = wordElement.dataset.wordId;
+            const wordId = wordElement.dataset.wordId; // This should always be set by displayWord
             // console.log('Word ID for audio:', wordId);
             
             if (!wordId) {
                 alert('Sorry, audio is not available for this word.');
                 return;
             }
+
+            let buttonToAnimate;
+            if (event && event.currentTarget.id === 'flashcard-listen-btn') {
+                buttonToAnimate = flashcardListenButton;
+            } else {
+                buttonToAnimate = listenWordButton;
+            }
             
             // Add visual feedback when playing
-            listenWordButton.classList.add('speaking');
+            buttonToAnimate.classList.add('speaking');
             
             // Create the audio URL
             const audioUrl = `${API_BASE_URL}/api/v1/audio/word/${wordId}`;
@@ -301,13 +341,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Add event listener for when audio has finished
             audio.onended = () => {
-                listenWordButton.classList.remove('speaking');
+                buttonToAnimate.classList.remove('speaking');
             };
             
             // Handle errors
             audio.onerror = (e) => {
                 console.error('Audio error:', e);
-                listenWordButton.classList.remove('speaking');
+                buttonToAnimate.classList.remove('speaking');
                 alert('Sorry, there was an error playing the audio.');
             };
             
@@ -316,7 +356,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error('Error playing word audio:', error);
+            // Remove speaking class from both buttons just in case
             listenWordButton.classList.remove('speaking');
+            flashcardListenButton.classList.remove('speaking');
             alert('Sorry, there was an error playing the audio.');
         }
     }
@@ -324,10 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Plays the audio for the example sentence
      */
-    async function playExampleAudio() {
+    async function playExampleAudio(event) {
         try {
-            const wordId = wordElement.dataset.wordId;
-            const listenExampleButton = document.getElementById('listen-example-btn');
+            const wordId = wordElement.dataset.wordId; // This should always be set by displayWord
+            const listenExampleButton = event.currentTarget; // Get the button that was clicked
+
             // console.log('Word ID for example audio:', wordId);
             
             if (!wordId || !listenExampleButton) {
@@ -362,9 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error('Error playing example audio:', error);
-            const listenExampleButton = document.getElementById('listen-example-btn');
-            if (listenExampleButton) {
-                listenExampleButton.classList.remove('speaking');
+            // Attempt to remove speaking class from the clicked button
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.remove('speaking');
             }
             alert('Sorry, there was an error playing the audio.');
         }
@@ -402,11 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Store the numeric ID in the response for audio playback
             randomWord.numeric_id = randomWordId;
+            currentWordData = randomWord; // Store for flashcard mode
             
             // Display the random word
             displayWord(randomWord);
         } catch (error) {
             console.error('Error fetching random word:', error);
+            currentWordData = null; // Reset on error
             handleError(error);
         }
     }
@@ -460,7 +505,68 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateString = formatDateForSeed(today);
         const seed = hashCode(dateString);
         const index = Math.abs(seed % fallbackWords.length);
-        
+        currentWordData = fallbackWords[index]; // Store for flashcard mode
         return fallbackWords[index];
+    }
+
+    /**
+     * Toggles between normal view and flashcard mode
+     */
+    function toggleFlashcardMode() {
+        isFlashcardMode = !isFlashcardMode;
+        
+        if (isFlashcardMode) {
+            wordContentElement.style.display = 'none';
+            flashcardContentElement.style.display = 'flex';
+            toggleFlashcardModeButton.textContent = 'Normal Mode';
+            if (currentWordData) {
+                populateFlashcard(currentWordData);
+            }
+            // Ensure flashcard is not flipped when entering mode
+            if (flashcardElement.classList.contains('flipped')) {
+                flashcardElement.classList.remove('flipped');
+            }
+        } else {
+            flashcardContentElement.style.display = 'none';
+            wordContentElement.style.display = 'block';
+            toggleFlashcardModeButton.textContent = 'Flashcard Mode';
+            // If word data exists, ensure normal view is populated
+            if (currentWordData) {
+                displayWord(currentWordData); // Re-display in normal mode
+            }
+        }
+    }
+
+    /**
+     * Populates the flashcard with the current word data
+     */
+    function populateFlashcard(word) {
+        // Ensure card is reset to front view when populating
+        if (flashcardElement.classList.contains('flipped')) {
+            flashcardElement.classList.remove('flipped');
+        }
+
+        // Front of the card
+        flashcardWordElement.textContent = word.word;
+        // Ensure wordId is set for the flashcard listen button (it uses wordElement.dataset.wordId)
+        wordElement.dataset.wordId = word.numeric_id || word.id || word._id || '';
+
+
+        // Back of the card
+        if (word.romanization) {
+            flashcardRomanizationElement.textContent = word.romanization;
+        } else {
+            flashcardRomanizationElement.textContent = '';
+        }
+        
+        // Populate definitions and example using the helper
+        populateDefinitionsAndExample(word, flashcardDefinitionsElement);
+    }
+
+    /**
+     * Flips the flashcard
+     */
+    function flipCard() {
+        flashcardElement.classList.toggle('flipped');
     }
 });

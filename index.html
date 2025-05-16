@@ -44,6 +44,34 @@
                         <!-- Definitions will be inserted here -->
                     </div>
                 </div>
+
+                <div class="flashcard-content" id="flashcard-content" style="display: none;">
+                    <div class="flashcard">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <h2 id="flashcard-word"></h2>
+                                <button id="flashcard-listen-btn" class="listen-btn" title="Listen to pronunciation">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="pronunciation-container">
+                                    <div class="pronunciation">
+                                        <p id="flashcard-romanization"></p>
+                                    </div>
+                                </div>
+                                <div class="definitions" id="flashcard-definitions">
+                                    <!-- Definitions will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="flip-card-btn">Flip Card</button>
+                </div>
                 
                 <div class="error" id="error" style="display: none;">
                     <p>Sorry, we couldn't load this word. Please try again later.</p>
@@ -56,6 +84,7 @@
             <div class="button-group">
                 <button id="new-word-btn">Get New Word</button>
                 <button id="share-btn">Share This Word</button>
+                <button id="toggle-flashcard-mode-btn">Flashcard Mode</button>
             </div>
             <div class="support-button" style="transform: scale(0.8); transform-origin: center; display: flex; justify-content: center;">
                 <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="shivvtrivedi" data-color="#FF5F5F" data-emoji=""  data-font="Lato" data-text="Support My Work" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>

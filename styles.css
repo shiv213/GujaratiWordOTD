@@ -271,7 +271,7 @@ footer p {
     margin-bottom: 1rem;
 }
 
-#share-btn, #new-word-btn {
+#share-btn, #new-word-btn, #toggle-flashcard-mode-btn {
     background-color: var(--secondary-color);
     color: white;
     border: none;
@@ -300,9 +300,122 @@ footer p {
     background-color: #3db8b0;
 }
 
-#share-btn:active, #new-word-btn:active {
+#share-btn:active, #new-word-btn:active, #toggle-flashcard-mode-btn:active {
     transform: translateY(0);
 }
+
+#toggle-flashcard-mode-btn {
+    background-color: var(--accent-color); /* Or another distinct color */
+    color: var(--text-color);
+}
+
+#toggle-flashcard-mode-btn:hover {
+    background-color: #e6a700; /* Darker accent */
+}
+
+
+/* Flashcard Styles */
+.flashcard-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.flashcard {
+    background-color: transparent;
+    width: 100%;
+    min-height: 250px; /* Adjust as needed */
+    perspective: 1000px; /* For 3D effect */
+    margin-bottom: 1rem;
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 250px; /* Match .flashcard */
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    min-height: 250px; /* Match .flashcard */
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+}
+
+.flashcard-front {
+    /* Front: Gujarati word and listen button */
+}
+
+.flashcard-front h2 {
+    font-size: 3.5rem; /* Larger for emphasis */
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.flashcard-back {
+    transform: rotateY(180deg);
+    /* Back: Romanization, definitions, example */
+    justify-content: flex-start; /* Align content to top */
+    overflow-y: auto; /* Scroll if content overflows */
+}
+
+.flashcard-back .pronunciation-container {
+    margin-bottom: 1rem;
+}
+
+.flashcard-back .definitions {
+    width: 100%; /* Ensure definitions take full width */
+    gap: 0.75rem;
+}
+
+.flashcard-back .definition-item,
+.flashcard-back .example-container {
+    padding: 0.75rem;
+    font-size: 0.9rem; /* Slightly smaller for more content */
+}
+
+#flip-card-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#flip-card-btn:hover {
+    background-color: #e05252; /* Darker primary */
+    transform: translateY(-2px);
+}
+
+#flip-card-btn:active {
+    transform: translateY(0);
+}
+
 
 /* Responsive Styles */
 @media (max-width: 768px) {
